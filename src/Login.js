@@ -1,40 +1,48 @@
 import { Container, Input } from 'native-base'
-import React, { useCallback, useEffect, useState } from 'react'
-import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { Alert, KeyboardAvoidingView, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import database from '@react-native-firebase/database';
 import auth from '@react-native-firebase/auth';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Loader from 'react-native-modal-loader';
 
 const Login = props => {
+    
+    const refPass= useRef(null)
     const [Email, setEmail] = useState('')
     const [Password, setPassword] = useState('')
     const [SecurePass, setSecurePass] = useState(true)
     const [Load, setLoad] = useState(false) 
-   
-    const login = () => {
-        auth().signInWithEmailAndPassword(Email, Password)
-        .then(res => { 
-            console.log('success login', res);
-
-            setTimeout(() => {
-                setLoad(false) 
-                props.navigation.replace('App')
-            }, 1000);
-        })
-        .catch(error => { 
-            const a = String(error)
-            const aa = a.indexOf('] ')
-            const b = a.substring(aa+1, a.length - 1) 
-            console.log('error', error);
-            Alert.alert('Error', b)
+    
+    const SubmitLogin = () => {
+        setLoad(true)
+        console.log(Email, Password)
+        if (Email == '' || Password == ''){
             setLoad(false)
-        }); 
-        
+            Alert.alert('Error', 'Please fill out the form')
+        } else { 
+            auth().signInWithEmailAndPassword(Email, Password)
+            .then(res => { 
+                console.log('success login', res);
+
+                setTimeout(() => {
+                    setLoad(false) 
+                    props.navigation.replace('App')
+                }, 1000);
+            })
+            .catch(error => { 
+                const a = String(error)
+                const aa = a.indexOf('] ')
+                const b = a.substring(aa+1, a.length - 1) 
+                console.log('error', error);
+                Alert.alert('Error', b)
+                setLoad(false)
+            }); 
+        }
     }
   
     return (
-        <Container style={{justifyContent: 'center', padding:24}}>
+        <KeyboardAvoidingView behavior={"padding"} style={{justifyContent: 'center', padding:24, flex:1}}>
             <Loader loading={Load} color="#F04758" /> 
             
             <View style={{ justifyContent: 'center', alignItems:'center',flex:.5}}>
@@ -51,19 +59,21 @@ const Login = props => {
                     value={Email}
                     placeholder='Your email address' 
                     keyboardType='email-address'
+                    onSubmitEditing={() => refPass.current.focus()}
                 />
             </View> 
 
             <Text style={{color:'#F04758', fontWeight: '700', letterSpacing: 1, lineHeight:23, marginTop:24 }}>Password</Text>
             <View style={{borderBottomWidth:1, borderBottomColor:'#ccc',height:50, flexDirection:'row', }}> 
                 <TextInput
-                    onChangeText={tx => setPassword(tx)}
+                    ref={refPass}
+                    onChangeText={tx => setPassword(tx)} 
                     value={Password}
                     style={{flex:1 }}
                     placeholder='Your password'
                     keyboardType='default'  
                     secureTextEntry={SecurePass}
-                    onChangeText={tx => setPassword(tx)}
+                    onSubmitEditing={() =>  SubmitLogin()}
                 />
             
                 <TouchableOpacity style={{alignItems: 'center',justifyContent: 'center', width: '10%'}}
@@ -75,14 +85,7 @@ const Login = props => {
 
             <TouchableOpacity activeOpacity={.8}
                 style={{backgroundColor:'#F04758', marginTop:24, padding:12, borderRadius:4, alignItems: 'center'}}
-                onPress={() => {
-                    if (Email == '' || Password == ''){
-                        Alert.alert('Error', 'Please fill out the form')
-                    } else {
-                        setLoad(true)
-                        login()
-                    }
-                }}>
+                onPress={() => SubmitLogin() }>
             <Text style={{color:'#fff', fontWeight: '700', letterSpacing: 1,  }}>Sign In</Text>
             </TouchableOpacity>
 
@@ -90,7 +93,7 @@ const Login = props => {
             <View style={{ justifyContent: 'center', alignItems:'flex-end',flex:.5}}>
                 <Text onPress={() => props.navigation.push('Register')} style={{color:'#F04758', fontWeight: 'bold', letterSpacing: 1, }}>Sign Up</Text>
             </View>
-        </Container>
+        </KeyboardAvoidingView>
     )
 }
 
