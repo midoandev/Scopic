@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1038051545338",
+    "project_id": "scopictest-84c39",
+    "storage_bucket": "scopictest-84c39.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1038051545338:android:41aa785fdd55662b48b943",
+        "android_client_info": {
+          "package_name": "com.scopic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1038051545338-d73rlsv4f8olq8peu2gfb00torr1n13m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.scopic",
+            "certificate_hash": "a613fff0ac842b23eedc5e2e0251ad24fa38a1f9"
+          }
+        },
+        {
+          "client_id": "1038051545338-pbofptk5trntqa7ki2llngamn5veku3t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUiym4qewXHdL0qoJS357s-4xcxTy2ILw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1038051545338-pbofptk5trntqa7ki2llngamn5veku3t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
