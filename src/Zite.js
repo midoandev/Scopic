@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import { Text, Platform} from 'react-native'; 
 import { NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -7,9 +7,10 @@ import { Container, View } from "native-base";
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 const Stack = createStackNavigator();  
 import Login from './Login';
-import Register from './Register';
-
+import Register from './Register'; 
 import Welcome from './Welcome';
+import auth from '@react-native-firebase/auth';
+import { SafeAreaProvider,  initialWindowMetrics } from 'react-native-safe-area-context' 
    
 function getHeaderTitle(route) {
     const routeName = getFocusedRouteNameFromRoute(route) ?? 'Dashboard';
@@ -18,9 +19,9 @@ function getHeaderTitle(route) {
   }
 
 function AppNavigator() {
-    return (
+    return ( 
         <Stack.Navigator initialRouteName={'home'}>  
-            <Stack.Screen name="home" component={Welcome}/>
+            <Stack.Screen name="home" component={Welcome} options={{ headerShown: false }}/>
 
         </Stack.Navigator> 
     );
@@ -37,22 +38,23 @@ function AuthStack() {
 }
 
 
-const Splash = props => {
-    useEffect(() => {
-        AsyncStorage.getItem('isLoggedIn').then(data => {
-            if (Platform.OS == 'ios'){
-                props.navigation.replace(data !== '1' ? 'Auth' : 'App');
-            } else {
-                setTimeout(() => {
-                    props.navigation.replace(data !== '1' ? 'Auth' : 'App');
-                }, 2000);
-            }
-            
-        })
+const Splash = props => { 
+    const onAuthStateChanged = (user) => {
+        console.log('userFb', user)
         
+        setTimeout(() => {
+            props.navigation.replace(user == null ?'Auth' : 'App');
+        }, 1000);
+        
+    }
+
+    useEffect(() => { 
+        const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+        return subscriber; // unsubscribe on unmount 
     }, [])
+
     return (
-        <View >
+        <View style={{flex:1, alignItems: 'center', justifyContent: 'center'}}>
             <Text>Welcome</Text>
         </View>
     )
@@ -62,6 +64,7 @@ const Splash = props => {
 
 export default function RootStack() {
     return (
+        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <NavigationContainer>
             <Stack.Navigator initialRouteName={'Loading'} screenOptions={{headerShown: false}}>
                 <Stack.Screen name="Loading" component={Splash} />
@@ -72,6 +75,9 @@ export default function RootStack() {
             {/* <Stack.Screen name="App" component={DrawerNavigator} /> */}
             
         </NavigationContainer>
+        </SafeAreaProvider>
     );
 }
+
+
 

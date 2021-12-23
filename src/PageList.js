@@ -8,7 +8,7 @@ import Loader from 'react-native-modal-loader';
  const Welcome = props => {
     const [Load, setLoad] = useState(false)
     return (
-        <Container style={{ padding:16}}> 
+        <Container style={{paddingTop: Platform.OS == 'ios' ? 80 : 20, padding:16}}> 
             <Loader loading={Load} color="#F04758" />  
                 <Text>Welcome</Text>  
             <TouchableOpacity activeOpacity={.8}

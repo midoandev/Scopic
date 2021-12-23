@@ -1,8 +1,9 @@
 
 import { Root } from 'native-base';
 import React from 'react';
-import {  View, LogBox } from 'react-native';
-
+import {  View, LogBox } from 'react-native'; 
+import { SafeAreaProvider,  initialWindowMetrics } from 'react-native-safe-area-context' 
+   
 import Zite from './src/Zite'
 LogBox.ignoreLogs([ 'Non-serializable values were found in the navigation state', ]);
 
