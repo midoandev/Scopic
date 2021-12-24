@@ -1,5 +1,5 @@
 import React, {Component, useEffect, useState} from 'react';
-import { Text, Platform, ActivityIndicator} from 'react-native'; 
+import { Text, Platform, ActivityIndicator, TouchableOpacity} from 'react-native'; 
 import { NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Container, View } from "native-base";
@@ -24,10 +24,16 @@ function AppNavigator(prop) {
             <Stack.Screen name="pagelist" component={PageList} initialParams={{DataSesi}} options={({ route, navigation }) => ({
                 title: 'List',
                 headerLeft: () => (
-                    <Text onPress={() => navigation.goBack()} style={{color:'#F04758', fontWeight: '700', fontSize:14, paddingHorizontal:12 }}>Back</Text>
+                    <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={.5}>
+                        <Text style={{color:'#F04758', fontWeight: '700', fontSize:14, paddingHorizontal:12 }}>Back</Text>
+                    </TouchableOpacity>
+                    
                 ),
-                headerRight: () => (
-                    <Text onPress={() => navigation.navigate('profile')} style={{color:'#F04758', fontWeight: '700', fontSize:14, paddingHorizontal:12 }}>Profile</Text>
+                headerTitleAlign: 'center',
+                headerRight: () => ( 
+                    <TouchableOpacity onPress={() => navigation.navigate('profile')} activeOpacity={.5}>
+                        <Text style={{color:'#F04758', fontWeight: '700', fontSize:14, paddingHorizontal:12 }}>Profile</Text>
+                    </TouchableOpacity>
                 ),
             })}/>
                 {/* {props => <PageList {...props} DataUser={JSON.stringify(props)} />}
@@ -35,8 +41,11 @@ function AppNavigator(prop) {
             
             <Stack.Screen name="profile" component={Profile} initialParams={{DataSesi}} options={({ route, navigation }) => ({
                 title: 'Profile',
+                headerTitleAlign: 'center',
                 headerLeft: () => (
-                    <Text onPress={() => navigation.goBack()} style={{color:'#F04758', fontWeight: '700', fontSize:14, paddingHorizontal:12 }}>Back</Text>
+                    <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={.5}>
+                        <Text style={{color:'#F04758', fontWeight: '700', fontSize:14, paddingHorizontal:12 }}>Back</Text>
+                    </TouchableOpacity>
                 ),
             })}/> 
         </Stack.Navigator> 

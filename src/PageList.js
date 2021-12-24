@@ -8,9 +8,10 @@ import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
 const { width, height } = Dimensions.get('window');
 import Loader from 'react-native-modal-loader';
-import { PopupAddList } from './Helper';
+import { generateTime, PopupAddList } from './Helper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
- const PageList = props => { 
+const PageList = props => { 
     const DataUser = JSON.parse(props.route.params.DataSesi)
     const [Load, setLoad] = useState(false)
     const [Swticed, setSwticed] = useState(true)
@@ -19,29 +20,71 @@ import { PopupAddList } from './Helper';
     const useDatabe = database().ref(`/users/${DataUser.uid}`)
 
     useEffect(() => {
-        const onValueChange = useDatabe.orderByKey('createdAt')
-          .on('value', snapshot => {
-            console.log('User data: ', snapshot ); 
-            let mylist = []
-            snapshot.forEach(child => {
-                let key = child.key
-                let obj = snapshot.child(key).val()
-                let value = obj.value
-                let trim = value.trim()
-                let removeSpace = trim.replace(/ +/g, "");
-                let result =  removeSpace.charAt(0).toUpperCase() + removeSpace.slice(1);
-                
-                mylist.push({id: key, value:result, createdAt: obj.createdAt})
+        ReadItem()
+    }, [Swticed, Load])
+
+    const ReadItem = () => {
+        if (Swticed){
+            useDatabe.orderByChild("date").once('value').then(snapshot => {
+                console.log('User data: ', snapshot ); 
+                let mylist = []
+                snapshot.forEach(child => {
+                    let key = child.key
+                    let obj = snapshot.child(key).val()
+                    let value = obj.value
+                    let trim = value.trim()
+                    let removeSpace = trim.replace(/ +/g, "");
+                    let result =  removeSpace.charAt(0).toUpperCase() + removeSpace.slice(1);
+                    
+                    mylist.push({id: key, value:result, date: obj.date})
+                });
+                console.log('m', mylist) 
+                setList(mylist.reverse())
             });
-            console.log('m', mylist) 
-            setList(mylist)
-          });
-    
-        // Stop listening for updates when no longer required
-        return () => useDatabe.off('value', onValueChange);
-    }, [DataUser.uid])
+        } else {
+            //AsyncStorage.removeItem(DataUser.uid) //for reset asyncstorage
+            AsyncStorage.getItem(DataUser.uid).then(vl => {
+                console.log('itemm', vl)
+                if (vl != null){
+                    let parse = JSON.parse(vl)
+                    setList(parse)
+                } else {
+                    setList([])
+                }
+            })
+        }
  
-    const RemoveItem = (item) => {
+    }
+ 
+    const AddItem = (text) => {
+        setLoad(true)
+        let data = { value: text, date: Math.round(+new Date()/1000)} 
+        if (Swticed){ 
+            useDatabe.push(data)
+                .then(() => {
+                    setShowForm(false) 
+                    setLoad(false)
+                    Toast.show({type:'success', text:'Successfully added'})
+                })
+                .catch(err => { 
+                    setShowForm(false) 
+                    setLoad(false)
+                    Toast.show({type:'danger', text: err})
+                })
+        } else {
+            let id = List.length>0 ? List[0].id+1 : 0
+            let addId = {...data, id}
+            let list = [addId, ...List]
+            AsyncStorage.setItem(DataUser.uid, JSON.stringify(list))
+                .then(() => { 
+                    setShowForm(false) 
+                    setLoad(false)
+                    Toast.show({type:'success', text:'Successfully added'})
+                })
+        }
+    }
+
+    const DeleteItem = (item) => {
         Alert.alert(
             'Alert!',
             'Are you sure you want to delete '+item.value+'?',
@@ -54,10 +97,20 @@ import { PopupAddList } from './Helper';
                 { 
                     text: "Yes, delete", 
                     onPress: () => {
-                        useDatabe.child(item.id).remove().then(e => {
-                            console.log('resRemove', e) 
-                            Toast.show({type:'success', text: 'Successfully deleted'})
-                        })
+                        setLoad(true)
+                        if (Swticed){ 
+                            useDatabe.child(item.id).remove().then(e => { 
+                                setLoad(false)
+                                Toast.show({type:'success', text: 'Successfully deleted'})
+                            })
+                        } else {
+                            let changeList = List.filter(ar => ar.id !== item.id) 
+                            AsyncStorage.setItem(DataUser.uid, JSON.stringify(changeList))
+                                .then(() => {  
+                                    setLoad(false)
+                                    Toast.show({type:'success', text: 'Successfully deleted'})
+                                })
+                        }
                     }
                 }
             ],
@@ -71,23 +124,11 @@ import { PopupAddList } from './Helper';
             <PopupAddList 
                 visible={ShowForm} 
                 close={() => setShowForm(false)} 
-                submit={text => {
-                    const d = new Date();
-                    let data = { value: text, createdAt: d.toString()} 
-                    useDatabe.push(data)
-                        .then(() => {
-                            setShowForm(false) 
-                            Toast.show({type:'success', text:'Successfully added'})
-                        })
-                        .catch(err => { 
-                            setShowForm(false) 
-                            Toast.show({type:'danger', text: err})
-                        })
-                }}
+                submit={text => AddItem(text)}
             />
             <View style={{alignItems: 'center', justifyContent: 'center'}}>
                 <Switch
-                    trackColor={{false: '#ccc' }}
+                    trackColor={{false: '#ccc', true:'green' }}
                     thumbColor={'#fff'}
                     ios_backgroundColor="#eee"
                     onValueChange={v =>  setSwticed(v) }
@@ -99,13 +140,13 @@ import { PopupAddList } from './Helper';
                 contentContainerStyle={{paddingVertical:16}}
                 data={List}
                 renderItem={({item, index}) =>( 
-                    <Swipeable 
+                    <Swipeable key={index}
                         renderRightActions={() => 
-                            <TouchableOpacity onPress={()=> RemoveItem(item)} activeOpacity={.8} style={{ backgroundColor: '#F15858', justifyContent: 'center', paddingHorizontal:48,  }} >
+                            <TouchableOpacity onPress={()=> DeleteItem(item)} activeOpacity={.8} style={{ backgroundColor: '#F15858', justifyContent: 'center', paddingHorizontal:48,  }} >
                                 <FontAwesome name='trash-o' size={24} color={'white'} /> 
                             </TouchableOpacity>
                         }
-                        onSwipeableRightOpen={() => RemoveItem(item)} 
+                        onSwipeableRightOpen={() => DeleteItem(item)} 
                     >
                         <View style={{borderBottomColor: '#eee', alignItems: 'center', borderBottomWidth:1, paddingVertical:16, flexDirection: 'row',}} key={index}>
                             <Text style={{fontWeight: '500', fontSize: 16, lineHeight: 20}}>{item.value}</Text>

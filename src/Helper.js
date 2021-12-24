@@ -3,7 +3,19 @@ import { Dimensions, KeyboardAvoidingView, Modal, Text, TextInput, TouchableOpac
 import AntDesign from 'react-native-vector-icons/AntDesign';
 const { width, height } = Dimensions.get('window');
 
-
+export const generateTime = () => {
+    const newDate = new Date();
+  
+    const date = newDate.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).replace(/[^0-9]/g, "");
+  
+    const time = newDate.getTime().toString();
+  
+    return date + time;
+}
 export const PopupAddList = ({ visible, close, submit }) => {
     // let lyn = st.selectedLayanan != '' ? Number(st.selectedLayanan.BiayaTotal) : 0
     // let hrgBrg = Number(st.barang.nilai)*0.0025
@@ -15,15 +27,14 @@ export const PopupAddList = ({ visible, close, submit }) => {
         const a = setTextList('')
         return a
     }, [visible])
-
-    console.log('renderChild')
+ 
     return(
       <Modal
         animationType={'none'}
         transparent={true}
         visible={visible}
         onRequestClose={() => close()}>
-        <KeyboardAvoidingView behavior={"padding"} style={{justifyContent: 'flex-end', flex:1, backgroundColor: '#000000AA' }}>
+        <KeyboardAvoidingView behavior={"height"} style={{justifyContent: 'flex-end', flex:1, backgroundColor: '#000000AA' }}>
             <View style={{alignSelf: 'baseline', backgroundColor: '#fff', width,shadowColor: 'grey',
                 shadowOffset: { width: 2, height: 2 }, shadowOpacity: .4, borderTopLeftRadius: 20,
                 borderTopRightRadius: 20,paddingHorizontal: 20, paddingVertical:28,}}>
@@ -39,6 +50,7 @@ export const PopupAddList = ({ visible, close, submit }) => {
                         onChangeText={tx => tx.length < 41 && setTextList(tx)}
                         value={TextList}
                         placeholder='Your text'  
+                        onSubmitEditing={() => TextList !=='' && submit(TextList)}
                     />
                 </View>
                 <View style={{flexDirection:'row', alignItems: 'center', padding:4, justifyContent: 'flex-end'}}>

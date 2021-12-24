@@ -42,7 +42,7 @@ const Login = props => {
     }
   
     return (
-        <KeyboardAvoidingView behavior={"padding"} style={{justifyContent: 'center', padding:24, flex:1}}>
+        <KeyboardAvoidingView behavior={"height"} style={{justifyContent: 'center', padding:24, flex:1}}>
             <Loader loading={Load} color="#F04758" /> 
             
             <View style={{ justifyContent: 'center', alignItems:'center',flex:.5}}>
